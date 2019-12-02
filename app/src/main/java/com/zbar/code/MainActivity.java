@@ -19,7 +19,7 @@ import android.widget.Toast;
 import com.zbar.code.camera.CameraManager;
 import com.zbar.code.camera.CameraPreview;
 import com.zbar.code.camera.ICamera;
-import com.zbar.code.camera.view.BarDistrictView;
+import com.zbar.code.camera.view.BarLayerView;
 import com.zbar.code.camera.beep.BeepSound;
 import com.zbar.code.camera.zxing.BarcodeUtil;
 import com.zbar.code.camera.zxing.PictureScan;
@@ -34,14 +34,14 @@ import java.io.IOException;
  */
 public class MainActivity extends AppCompatActivity implements ICamera.Listener {
     CameraPreview mCameraPreview;
-    BarDistrictView mBarDistrictView;
+    BarLayerView mBarLayerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBarDistrictView = findViewById(R.id.bar_district_view);
+        mBarLayerView = findViewById(R.id.bar_layer_view);
 
         BeepSound.init(this);
         getLifecycle().addObserver(BeepSound.get());
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements ICamera.Listener 
 
     @Override
     public Rect getCropRect(int w, int h) {
-        Rect rect = mBarDistrictView.getImageRect(w, h);
+        Rect rect = mBarLayerView.getImageRect(w, h);
         //Log.d("getCropRect", String.format("\nl:%d\nr:%d\nt:%d\nb:%d", rect.left, rect.right, rect.top, rect.bottom));
         return rect;
     }

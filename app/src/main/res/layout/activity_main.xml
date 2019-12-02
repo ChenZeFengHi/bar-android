@@ -18,45 +18,30 @@
         app:layout_constraintVertical_bias="0.0" />
 
 
-    <RelativeLayout
-        android:id="@+id/lay_capture_crop_layout"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:layout_centerHorizontal="true"
-        android:background="@drawable/ic_capture"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/lay_frame"
-        app:layout_constraintLeft_toLeftOf="@id/lay_frame"
-        app:layout_constraintRight_toRightOf="@id/lay_frame"
-        app:layout_constraintTop_toTopOf="@id/lay_frame">
+    <com.zbar.code.camera.view.BarLayerView
+        android:id="@+id/bar_layer_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:bar_height="250dp"
+        app:bar_width="250dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:offset_y="-50dp">
+
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_capture" />
 
         <ImageView
             android:id="@+id/iv_capture_scan_line"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
             android:background="@drawable/ic_scan_ray"
             android:contentDescription="@null" />
-    </RelativeLayout>
-
-
-    <com.zbar.code.camera.view.BarDistrictView
-        android:id="@+id/bar_district_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="请将条码对入框内"
-            android:textColor="#000"
-            tools:ignore="HardcodedText" />
-    </com.zbar.code.camera.view.BarDistrictView>
+    </com.zbar.code.camera.view.BarLayerView>
 
 
     <TextView

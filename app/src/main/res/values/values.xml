@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BarLayerView">
+        <attr name="offset_y" format="dimension" />
+        <attr name="offset_x" format="dimension" />
+        <attr name="bar_width" format="dimension" />
+        <attr name="bar_height" format="dimension" />
+    </declare-styleable>
+</resources>

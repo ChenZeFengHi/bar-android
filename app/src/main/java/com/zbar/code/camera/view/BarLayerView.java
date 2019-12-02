@@ -1,6 +1,8 @@
 package com.zbar.code.camera.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -12,51 +14,86 @@ import android.view.ViewGroup;
 
 import androidx.annotation.RequiresApi;
 
+import com.zbar.code.R;
+
 /**
- * Description Bar区域View
+ * Description BarLayer View
  * Version 1.0
  * Created by Czf on 2019/11/25 13:36
  */
-public class BarDistrictView extends ViewGroup {
-    public static final String TAG = BarDistrictView.class.getSimpleName();
-    public int districtWidth;
-    public int districtHeight;
+public class BarLayerView extends ViewGroup {
+    public static final String TAG = BarLayerView.class.getSimpleName();
 
-    private Rect districtRect = new Rect();
+
+    /**
+     * View Width
+     */
+    private int measureWidth;
+    /**
+     * View Height
+     */
+    private int measureHeight;
+
+    /**
+     * BarLayer
+     */
+    private Rect mBarLayerRect = new Rect();
+    public int mBarLayerWidth;
+    public int mBarLayerHeight;
+    /**
+     * center point offset x
+     */
+    private float offsetX = 0;
+    /**
+     * center point offset y
+     */
+    private float offsetY = 0;
+
 
     private Paint districtPaint = new Paint();
 
-    private int measureWidth;
-    private int measureHeight;
-
-    public BarDistrictView(Context context) {
+    public BarLayerView(Context context) {
         super(context);
-        init();
+        init(null);
     }
 
-    public BarDistrictView(Context context, AttributeSet attrs) {
+    public BarLayerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(attrs);
     }
 
-    public BarDistrictView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BarLayerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(attrs);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public BarDistrictView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public BarLayerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(attrs);
     }
 
-    private void init() {
-        float density = getResources().getDisplayMetrics().density;
-        districtWidth = (int) (280 * density);
-        districtHeight = (int) (280 * density);
+    private void init(AttributeSet attrs) {
+        float mBarLayerWidth = 0;
+        float mBarLayerHeight = 0;
+        float offsetX = 0;
+        float offsetY = 0;
+        if (attrs != null) {
+            @SuppressLint("Recycle")
+            TypedArray mTypedArray = getContext().obtainStyledAttributes(attrs, R.styleable.BarLayerView);
+            mBarLayerWidth = mTypedArray.getDimension(R.styleable.BarLayerView_bar_width, 280);
+            mBarLayerHeight = mTypedArray.getDimension(R.styleable.BarLayerView_bar_height, 280);
 
-        districtPaint.setColor(0x7F000000);
+            offsetX = mTypedArray.getDimension(R.styleable.BarLayerView_offset_x, 0);
+            offsetY = mTypedArray.getDimension(R.styleable.BarLayerView_offset_y, 0);
+        }
+        this.mBarLayerWidth = (int) mBarLayerWidth;
+        this.mBarLayerHeight = (int) mBarLayerHeight;
 
+        this.districtPaint.setColor(0x7F000000);
+
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
         setWillNotDraw(false);
     }
 
@@ -122,12 +159,12 @@ public class BarDistrictView extends ViewGroup {
         int vwc = measureWidth / 2;
         int vhc = measureHeight / 2;
 
-        int left = vwc - ((districtWidth / 2));
-        int top = vhc - ((districtHeight / 2));
+        int left = (int) (vwc - ((mBarLayerWidth / 2)) + offsetX);
+        int top = (int) (vhc - ((mBarLayerHeight / 2)) + offsetY);
 
-        districtRect.set(left, top, left + districtWidth, top + districtHeight);
+        mBarLayerRect.set(left, top, left + mBarLayerWidth, top + mBarLayerHeight);
 
-        Log.d(TAG, districtRect.toString());
+        Log.d(TAG, mBarLayerRect.toString());
     }
 
     @Override
@@ -138,10 +175,13 @@ public class BarDistrictView extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             child = getChildAt(i);
             if (child.getVisibility() != View.GONE) {
-                int childLeft = districtRect.left + districtWidth / 2 - child.getMeasuredWidth() / 2;
-                int childTop = districtRect.top + districtWidth / 2 - child.getMeasuredHeight() / 2;
+                //child w - h , The xx shall prevail
+                int childLeft = mBarLayerRect.left;
+                int childTop = mBarLayerRect.top;
+                int childRight = mBarLayerRect.right;
+                int childBottom = mBarLayerRect.bottom;
 
-                child.layout(childLeft, childTop, childLeft + child.getMeasuredWidth(), childTop + child.getMeasuredHeight());
+                child.layout(childLeft, childTop, childRight, childBottom);
 
                 Log.d(TAG, String.format("\nchange:%b\nleft:%d\ntop:%d\nright:%d\nbottom:%d\nchildCount:%d", changed, l, t, r, b, childCount));
 
@@ -158,13 +198,13 @@ public class BarDistrictView extends ViewGroup {
         Log.d(TAG, "onDraw:执行了");
 
         //top
-        canvas.drawRect(0, 0, measureWidth, districtRect.top, districtPaint);
+        canvas.drawRect(0, 0, measureWidth, mBarLayerRect.top, districtPaint);
         //left
-        canvas.drawRect(0, districtRect.top, districtRect.left, districtRect.bottom, districtPaint);
+        canvas.drawRect(0, mBarLayerRect.top, mBarLayerRect.left, mBarLayerRect.bottom, districtPaint);
         //right
-        canvas.drawRect(districtRect.right, districtRect.top, measureWidth, districtRect.bottom, districtPaint);
+        canvas.drawRect(mBarLayerRect.right, mBarLayerRect.top, measureWidth, mBarLayerRect.bottom, districtPaint);
         //bottom
-        canvas.drawRect(0, districtRect.bottom, measureWidth, measureHeight, districtPaint);
+        canvas.drawRect(0, mBarLayerRect.bottom, measureWidth, measureHeight, districtPaint);
     }
 
     @Override
@@ -188,10 +228,10 @@ public class BarDistrictView extends ViewGroup {
         float hScale = h / (float) measureHeight;
 
         Rect rect = new Rect();
-        rect.left = (int) (districtRect.left * wScale);
-        rect.right = (int) (districtRect.right * wScale);
-        rect.top = (int) (districtRect.top * hScale);
-        rect.bottom = (int) (districtRect.bottom * hScale);
+        rect.left = (int) (mBarLayerRect.left * wScale);
+        rect.right = (int) (mBarLayerRect.right * wScale);
+        rect.top = (int) (mBarLayerRect.top * hScale);
+        rect.bottom = (int) (mBarLayerRect.bottom * hScale);
         return rect;
     }
 }
