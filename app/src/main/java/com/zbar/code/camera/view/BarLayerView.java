@@ -1,5 +1,7 @@
 package com.zbar.code.camera.view;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -12,9 +14,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IntDef;
 import androidx.annotation.RequiresApi;
 
 import com.zbar.code.R;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Description BarLayer View
@@ -24,6 +32,17 @@ import com.zbar.code.R;
 public class BarLayerView extends ViewGroup {
     public static final String TAG = BarLayerView.class.getSimpleName();
 
+    @Target({
+            ElementType.PARAMETER,
+            ElementType.FIELD,
+            ElementType.METHOD,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({Type.BAR, Type.QR})
+    @interface Type {
+        int BAR = 1;
+        int QR = 2;
+    }
 
     /**
      * View Width
@@ -38,8 +57,11 @@ public class BarLayerView extends ViewGroup {
      * BarLayer
      */
     private Rect mBarLayerRect = new Rect();
-    public int mBarLayerWidth;
-    public int mBarLayerHeight;
+    public int mBarLayerRawWidth;
+    public int mBarLayerRawHeight;
+
+
+    // --------------------- attr ---------------------
     /**
      * center point offset x
      */
@@ -48,6 +70,19 @@ public class BarLayerView extends ViewGroup {
      * center point offset y
      */
     private float offsetY = 0;
+
+    /**
+     * qr/bar w-h
+     */
+    private float qrWidth, qrHeight, barWidth, barHeight;
+
+    /**
+     * style type
+     */
+    @Type
+    private int mType;
+
+    // --------------------- attr ---------------------
 
 
     private Paint districtPaint = new Paint();
@@ -74,27 +109,63 @@ public class BarLayerView extends ViewGroup {
     }
 
     private void init(AttributeSet attrs) {
-        float mBarLayerWidth = 0;
-        float mBarLayerHeight = 0;
         float offsetX = 0;
         float offsetY = 0;
         if (attrs != null) {
             @SuppressLint("Recycle")
             TypedArray mTypedArray = getContext().obtainStyledAttributes(attrs, R.styleable.BarLayerView);
-            mBarLayerWidth = mTypedArray.getDimension(R.styleable.BarLayerView_bar_width, 280);
-            mBarLayerHeight = mTypedArray.getDimension(R.styleable.BarLayerView_bar_height, 280);
+            barWidth = mTypedArray.getDimension(R.styleable.BarLayerView_bar_width, dpToPx(300));
+            barHeight = mTypedArray.getDimension(R.styleable.BarLayerView_bar_height, dpToPx(120));
+            qrWidth = mTypedArray.getDimension(R.styleable.BarLayerView_qr_width, dpToPx(250));
+            qrHeight = mTypedArray.getDimension(R.styleable.BarLayerView_qr_height, dpToPx(250));
+
+            mType = mTypedArray.getInt(R.styleable.BarLayerView_type, Type.QR);
 
             offsetX = mTypedArray.getDimension(R.styleable.BarLayerView_offset_x, 0);
             offsetY = mTypedArray.getDimension(R.styleable.BarLayerView_offset_y, 0);
         }
-        this.mBarLayerWidth = (int) mBarLayerWidth;
-        this.mBarLayerHeight = (int) mBarLayerHeight;
+
+        switch (mType) {
+            case Type.BAR:
+                this.mBarLayerRawWidth = (int) barWidth;
+                this.mBarLayerRawHeight = (int) barHeight;
+                break;
+            case Type.QR:
+                this.mBarLayerRawWidth = (int) qrWidth;
+                this.mBarLayerRawHeight = (int) qrHeight;
+                break;
+        }
+
 
         this.districtPaint.setColor(0x7F000000);
 
         this.offsetX = offsetX;
         this.offsetY = offsetY;
         setWillNotDraw(false);
+    }
+
+    public void setBarLayerWidth(int barLayerWidth) {
+        this.mBarLayerRawWidth = barLayerWidth;
+
+        int vwc = measureWidth / 2;
+        int vhc = measureHeight / 2;
+
+        int left = (int) (vwc - ((mBarLayerRawWidth / 2)) + offsetX);
+        int top = (int) (vhc - ((mBarLayerRawHeight / 2)) + offsetY);
+
+        mBarLayerRect.set(left, top, left + mBarLayerRawWidth, top + mBarLayerRawHeight);
+    }
+
+    public void setBarLayerHeight(int barLayerHeight) {
+        this.mBarLayerRawHeight = barLayerHeight;
+
+        int vwc = measureWidth / 2;
+        int vhc = measureHeight / 2;
+
+        int left = (int) (vwc - ((mBarLayerRawWidth / 2)) + offsetX);
+        int top = (int) (vhc - ((mBarLayerRawHeight / 2)) + offsetY);
+
+        mBarLayerRect.set(left, top, left + mBarLayerRawWidth, top + mBarLayerRawHeight);
     }
 
     /**
@@ -159,10 +230,10 @@ public class BarLayerView extends ViewGroup {
         int vwc = measureWidth / 2;
         int vhc = measureHeight / 2;
 
-        int left = (int) (vwc - ((mBarLayerWidth / 2)) + offsetX);
-        int top = (int) (vhc - ((mBarLayerHeight / 2)) + offsetY);
+        int left = (int) (vwc - ((mBarLayerRawWidth / 2)) + offsetX);
+        int top = (int) (vhc - ((mBarLayerRawHeight / 2)) + offsetY);
 
-        mBarLayerRect.set(left, top, left + mBarLayerWidth, top + mBarLayerHeight);
+        mBarLayerRect.set(left, top, left + mBarLayerRawWidth, top + mBarLayerRawHeight);
 
         Log.d(TAG, mBarLayerRect.toString());
     }
@@ -233,5 +304,80 @@ public class BarLayerView extends ViewGroup {
         rect.top = (int) (mBarLayerRect.top * hScale);
         rect.bottom = (int) (mBarLayerRect.bottom * hScale);
         return rect;
+    }
+
+
+    public void useBarScan() {
+        if (mType == Type.BAR) return;
+
+        AnimatorSet animatorSet = new AnimatorSet();
+
+        animatorSet.setDuration(500);
+
+        ValueAnimator animator_height = ValueAnimator.ofInt(mBarLayerRawHeight, (int) barHeight);
+        animator_height.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateBarHeight(Integer.valueOf(String.valueOf(animation.getAnimatedValue())));
+            }
+        });
+        ValueAnimator animator_width = ValueAnimator.ofInt(mBarLayerRawWidth, (int) barWidth);
+        animator_width.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateBarWidth(Integer.valueOf(String.valueOf(animation.getAnimatedValue())));
+            }
+        });
+        animatorSet.play(animator_height).with(animator_width);
+        animatorSet.start();
+
+        mType = Type.BAR;
+    }
+
+    public void useQRScan() {
+        if (mType == Type.QR) return;
+
+        AnimatorSet animatorSet = new AnimatorSet();
+
+        animatorSet.setDuration(500);
+
+        ValueAnimator animator_height = ValueAnimator.ofInt(mBarLayerRawHeight, (int) qrHeight);
+        animator_height.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateBarHeight(Integer.valueOf(String.valueOf(animation.getAnimatedValue())));
+            }
+        });
+        ValueAnimator animator_width = ValueAnimator.ofInt(mBarLayerRawWidth, (int) qrWidth);
+        animator_width.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateBarWidth(Integer.valueOf(String.valueOf(animation.getAnimatedValue())));
+            }
+        });
+
+        animatorSet.play(animator_height).with(animator_width);
+
+        animatorSet.start();
+
+        mType = Type.QR;
+    }
+
+    private void updateBarWidth(int width) {
+        if (width == 0) return;
+        setBarLayerWidth(width);
+        requestLayout();
+        invalidate();
+    }
+
+    private void updateBarHeight(int height) {
+        if (height == 0) return;
+        setBarLayerHeight(height);
+        requestLayout();
+        invalidate();
+    }
+
+    int dpToPx(int dp) {
+        return (int) (getResources().getDisplayMetrics().density * dp + 0.5);
     }
 }

@@ -137,6 +137,10 @@ public class MainActivity extends AppCompatActivity implements ICamera.Listener 
             if (BarcodeUtil.encodeQR("QR:123456789", 300, 300, getExternalFilesDir(Environment.DIRECTORY_PICTURES) + File.separator + "qr.jpg")) {
                 Toast.makeText(this, String.format("二维码已保存至 %s", fileName), Toast.LENGTH_SHORT).show();
             }
+        } else if (i == R.id.tv_bar_scan) {
+            mBarLayerView.useBarScan();
+        } else if (i == R.id.tv_qr_scan) {
+            mBarLayerView.useQRScan();
         }
     }
 

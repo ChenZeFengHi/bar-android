@@ -5,5 +5,11 @@
         <attr name="offset_x" format="dimension" />
         <attr name="bar_width" format="dimension" />
         <attr name="bar_height" format="dimension" />
+        <attr name="qr_width" format="dimension" />
+        <attr name="qr_height" format="dimension" />
+        <attr name="type" format="enum">
+            <enum name="bar" value="1" />
+            <enum name="qr" value="2" />
+        </attr>
     </declare-styleable>
 </resources>
