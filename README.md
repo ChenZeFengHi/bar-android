@@ -1,4 +1,4 @@
-# Zbar-Android  
+# ZBar Android  
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/ChenZeFengHi/material-palette)  [![Material Design](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/ChenZeFengHi/material-palette)
 
@@ -12,9 +12,11 @@
 
 
 
-如需要更新so、jar 可自行编译
 
->* ZBar的编译项目： https://github.com/ChenZeFengHi/zbar-android 
+
+**如需要更新so、jar 可自行编译**
+
+>* ZBar的编译项目： https://github.com/ChenZeFengHi/zbar-build
 
 ---
 
